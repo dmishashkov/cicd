@@ -1,0 +1,64 @@
+stages:
+  - build
+  - test_style
+  - test_integration
+  - deploy
+  - notify
+  
+build-job:
+  tags:
+    - build
+  stage: build
+  script:
+    - chmod 777 ./src/build.sh
+    - src/build.sh
+  artifacts:
+    expire_in: 30 days
+    paths:
+      - ./src/grep/s21_grep
+      - ./src/cat/s21_cat
+
+codestyle-job:
+  tags:
+    - tests
+  stage: test_style
+  script:
+    - chmod 777 ./src/codestyle.sh
+    - ./src/codestyle.sh
+
+
+test-job:
+  tags:
+    - tests
+  stage: test_integration
+  script:
+    - chmod 777 ./src/tests.sh
+    - ./src/tests.sh
+
+deploy-job:
+  allow_failure: false
+  tags:
+    - deploy
+  stage: deploy
+  when: manual
+  script:
+  - chmod 777 ./src/copy.sh
+  - ./src/copy.sh
+
+notify-success:
+  tags:
+    - deploy
+  stage: notify
+  when: on_success
+  script:
+    - chmod 777 ./src/notify_telegram.sh
+    - ./src/notify_telegram.sh "SUCCESS URAAAA"
+
+notify-fail:
+  tags:
+    - deploy
+  stage: notify
+  when: on_failure
+  script:
+    - chmod 777 ./src/notify_telegram.sh
+    - ./src/notify_telegram.sh "FAILURE NEEEEEEEET"
